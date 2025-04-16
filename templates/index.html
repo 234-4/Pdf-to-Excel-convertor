@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PDF to Excel Converter</title>
+</head>
+<body>
+  <h2>Convert PDF to Excel</h2>
+  <input type="file" id="pdfFile" accept="application/pdf">
+  <button onclick="uploadPDF()">Convert</button>
+  <p id="status"></p>
+
+  <script>
+    function uploadPDF() {
+      const fileInput = document.getElementById('pdfFile');
+      const status = document.getElementById('status');
+
+      if (!fileInput.files.length) {
+        status.innerText = "Please select a PDF.";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      status.innerText = "Uploading and converting...";
+
+      fetch("http://localhost:5000/convert", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Conversion failed.");
+        return response.blob();
+      })
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "converted.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        status.innerText = "Conversion successful!";
+      })
+      .catch(() => {
+        status.innerText = "Something went wrong.";
+      });
+    }
+  </script>
+</body>
+</html>
